@@ -1,4 +1,4 @@
-package br.com.borracharia.dto;
+package br.com.borracharia.dto.login;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
@@ -7,7 +7,7 @@ import lombok.Data;
 public class LoginReq {
 
     @NotBlank
-    public String username;
+    private String username;
     @NotBlank
-    public String password;
+    private String password;
 }
