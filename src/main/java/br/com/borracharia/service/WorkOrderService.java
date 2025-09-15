@@ -35,8 +35,8 @@ public class WorkOrderService {
                 : repo.findByIdAndCreatedBy(id, auth.getName()).orElse(null);
     }
 
-    // Criar nova OS
-    public WorkOrder create(WorkOrder order) {
+    // Criar nova OS (ADMIN e FUNC podem criar)
+    public WorkOrder create(WorkOrder order, Authentication auth) {
         if (order.getServiceDate() == null) {
             order.setServiceDate(LocalDateTime.now());
         }
@@ -44,6 +44,10 @@ public class WorkOrderService {
             order.setStatus(WorkOrderStatus.OPEN);
         }
         order.setTotal(calculateTotal(order.getItems()));
+
+        // seta quem criou a OS
+        order.setCreatedBy(auth.getName());
+
         return repo.save(order);
     }
 
@@ -88,4 +92,3 @@ public class WorkOrderService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 }
-

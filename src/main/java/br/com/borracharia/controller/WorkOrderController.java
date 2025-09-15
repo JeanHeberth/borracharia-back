@@ -20,31 +20,39 @@ import java.util.List;
 @RequestMapping("/api/work-orders")
 public class WorkOrderController {
     private final WorkOrderService service;
-    public WorkOrderController(WorkOrderService service){ this.service = service; }
+
+    public WorkOrderController(WorkOrderService service) {
+        this.service = service;
+    }
 
     @GetMapping
-    public List<WorkOrder> list(Authentication auth){ return service.list(auth); }
-    @GetMapping("/{id}") public ResponseEntity<WorkOrder> get(@PathVariable String id, Authentication auth){
+    public List<WorkOrder> list(Authentication auth) {
+        return service.list(auth);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<WorkOrder> get(@PathVariable String id, Authentication auth) {
         var wo = service.getById(id, auth);
         return wo != null ? ResponseEntity.ok(wo) : ResponseEntity.notFound().build();
     }
 
     @PostMapping
-    public ResponseEntity<WorkOrder> create(@Valid @RequestBody WorkOrderReq req){
-        var saved = service.create(req.toEntity());
+    public ResponseEntity<WorkOrder> create(@Valid @RequestBody WorkOrderReq req, Authentication auth) {
+        var saved = service.create(req.toEntity(), auth);
         return ResponseEntity.created(URI.create("/api/work-orders/" + saved.getId())).body(saved);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<WorkOrder> update(@PathVariable String id, @Valid @RequestBody WorkOrderReq req, Authentication auth){
+    public ResponseEntity<WorkOrder> update(@PathVariable String id, @Valid @RequestBody WorkOrderReq req, Authentication auth) {
         var upd = service.update(id, req.toEntity(), auth);
         return upd != null ? ResponseEntity.ok(upd) : ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable String id, Authentication auth){
+    public ResponseEntity<Void> delete(@PathVariable String id, Authentication auth) {
         return service.delete(id, auth) ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
     }
+
 
     @Data
     public static class WorkOrderReq {
@@ -55,7 +63,7 @@ public class WorkOrderController {
         PaymentMethod paymentMethod;
         WorkOrderStatus status;
 
-        public WorkOrder toEntity(){
+        public WorkOrder toEntity() {
             var total = items == null ? BigDecimal.ZERO :
                     items.stream().map(i -> i.getUnitPrice().multiply(BigDecimal.valueOf(i.getQuantity())))
                             .reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -71,4 +79,3 @@ public class WorkOrderController {
         }
     }
 }
-
