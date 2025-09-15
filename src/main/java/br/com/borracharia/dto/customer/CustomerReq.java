@@ -1,4 +1,4 @@
-package br.com.borracharia.dto;
+package br.com.borracharia.dto.customer;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
@@ -7,7 +7,7 @@ import lombok.Data;
 public class CustomerReq {
 
     @NotBlank
-    public String name;
-    public String phone;
-    public String email;
+    private String name;
+    private String phone;
+    private String email;
 }

@@ -1,8 +1,10 @@
 package br.com.borracharia.service;
 
+import br.com.borracharia.dto.user.CreateUserReq;
 import br.com.borracharia.entity.User;
-import br.com.borracharia.enums.Role;
+import br.com.borracharia.mapper.user.UserMapper;
 import br.com.borracharia.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
@@ -10,67 +12,68 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
 
-    private final UserRepository repo;
-
-    public UserService(UserRepository repo) {
-        this.repo = repo;
-    }
+    private final UserRepository userRepository;
 
     // Criar novo usuário
-    public User createUser(String username, String password, Role role, boolean enabled) {
-        if (repo.findByUsername(username).isPresent()) {
-            throw new IllegalArgumentException("Usuário já existe: " + username);
+    public User createUser(CreateUserReq req) {
+        if (userRepository.findByUsername(req.getUsername()).isPresent()) {
+            throw new IllegalArgumentException("Usuário já existe: " + req.getUsername());
         }
-
-        String passwordHash = BCrypt.hashpw(password, BCrypt.gensalt());
-
-        User user = User.builder()
-                .username(username)
-                .passwordHash(passwordHash)
-                .role(role)
-                .enabled(enabled)
-                .build();
-
-        return repo.save(user);
+        var user = UserMapper.toEntity(req); // já faz o hash da senha
+        return userRepository.save(user);
     }
 
     // Buscar por username
     public Optional<User> findByUsername(String username) {
-        return repo.findByUsername(username);
+        return userRepository.findByUsername(username);
     }
 
     // Buscar todos
     public List<User> findAll() {
-        return repo.findAll();
+        return userRepository.findAll();
     }
 
-    // Atualizar senha
+    // Atualizar senha (ADMIN reseta)
     public User updatePassword(String username, String newPassword) {
-        User user = repo.findByUsername(username)
+        var user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado: " + username));
 
         user.setPasswordHash(BCrypt.hashpw(newPassword, BCrypt.gensalt()));
-        return repo.save(user);
+        return userRepository.save(user);
+    }
+
+    // Atualizar senha do próprio usuário
+    public User updateOwnPassword(String username, String oldPassword, String newPassword) {
+        var user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado: " + username));
+
+        if (!BCrypt.checkpw(oldPassword, user.getPasswordHash())) {
+            throw new IllegalArgumentException("Senha atual incorreta");
+        }
+
+        user.setPasswordHash(BCrypt.hashpw(newPassword, BCrypt.gensalt()));
+        return userRepository.save(user);
     }
 
     // Ativar/Desativar usuário
     public User toggleEnabled(String username, boolean enabled) {
-        User user = repo.findByUsername(username)
+        var user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado: " + username));
 
         user.setEnabled(enabled);
-        return repo.save(user);
+        return userRepository.save(user);
     }
 
-    // Deletar
+    // Deletar usuário
     public boolean deleteUser(String username) {
-        Optional<User> userOpt = repo.findByUsername(username);
-        if (userOpt.isPresent()) {
-            repo.delete(userOpt.get());
-            return true;
-        }
-        return false;
+        return userRepository.findByUsername(username)
+                .map(user -> {
+                    userRepository.delete(user);
+                    return true;
+                })
+                .orElse(false);
     }
 }
