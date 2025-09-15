@@ -1,33 +1,26 @@
-package br.com.borracharia.entity;
+package br.com.borracharia.dto.worker;
 
-import br.com.borracharia.common.BaseAudit;
+import br.com.borracharia.entity.ServiceItem;
 import br.com.borracharia.enums.PaymentMethod;
 import br.com.borracharia.enums.WorkOrderStatus;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Document("work_orders")
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
-public class WorkOrder extends BaseAudit {
-    @Id
-    private String id;
+public class WorkOrderRes {
 
+    private String id;
     private String customerId;
     private String plate;
     private LocalDateTime serviceDate;
     private List<ServiceItem> items;
-    private BigDecimal total;
     private PaymentMethod paymentMethod;
     private WorkOrderStatus status;
+    private BigDecimal total;
+    private String createdBy;
 }

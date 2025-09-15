@@ -1,4 +1,4 @@
-package br.com.borracharia.dto;
+package br.com.borracharia.dto.token;
 
 import lombok.Data;
 
