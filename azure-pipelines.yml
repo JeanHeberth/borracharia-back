@@ -1,22 +1,21 @@
 # Gradle
 # Build your Java project and run tests with Gradle using a Gradle wrapper script.
-# Add steps that analyze code, save build artifacts, deploy, and more:
 # https://docs.microsoft.com/azure/devops/pipelines/languages/java
 
 trigger:
-- main
+  - main
 
 pool:
   vmImage: ubuntu-latest
 
 steps:
-- task: Gradle@3
-  inputs:
-    gradleWrapperFile: 'gradlew'  # Path to your Gradle wrapper
-    tasks: 'build'  # Replace with the tasks you want to run
-    options: '-Xmx3072m' 
-    publishJUnitResults: true
-    testResultsFiles: '**/TEST-*.xml'  # Updated pattern for test result files
-    javaHomeOption: 'JDKVersion'
-    jdkVersionOption: '1.11'  # Replace with your JDK version
-    jdkArchitectureOption: 'x64'
+  - task: Gradle@3
+    inputs:
+      gradleWrapperFile: 'gradlew'   # Caminho para o Gradle Wrapper
+      tasks: 'build'                 # Altere se quiser rodar outras tasks (ex: test)
+      options: '-Xmx3072m'
+      publishJUnitResults: true
+      testResultsFiles: '**/TEST-*.xml'
+      javaHomeOption: 'JDKVersion'   # Informa que vamos usar versão do JDK instalada no agente
+      jdkVersionOption: '1.17'       # Java 21
+      jdkArchitectureOption: 'x64'
