@@ -1,5 +1,6 @@
 trigger:
-  - main
+- main
+- Develop
 
 pool:
   name: agentPool   # usa o agente self-hosted MacM4-Agent
@@ -8,7 +9,7 @@ steps:
   # Checkout do repositório
   - checkout: self
 
-  # Configurar cache para Gradle (usa .gradle e build-cache)
+  # Configurar cache para Gradle
   - task: Cache@2
     inputs:
       key: 'gradle | "$(Agent.OS)" | build.gradle'
