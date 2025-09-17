@@ -8,7 +8,14 @@ steps:
   # Checkout do repositório
   - checkout: self
 
-  # Configurar cache para Gradle (usa .gradle e build-cache)
+  # Instalar JDK 17 no agente
+  - task: JavaToolInstaller@0
+    inputs:
+      versionSpec: '17'
+      jdkArchitectureOption: 'x64'
+      jdkSourceOption: 'PreInstalled'
+
+  # Configurar cache para Gradle
   - task: Cache@2
     inputs:
       key: 'gradle | "$(Agent.OS)" | build.gradle'
@@ -26,7 +33,7 @@ steps:
       publishJUnitResults: true
       testResultsFiles: '**/TEST-*.xml'
       javaHomeOption: 'JDKVersion'
-      jdkVersionOption: '1.17'       # Java 17
+      jdkVersionOption: '1.17'       # Agora deve funcionar
       jdkArchitectureOption: 'x64'
 
   # Publicar resultados de testes
