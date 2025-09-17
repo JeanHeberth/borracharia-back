@@ -1,22 +1,36 @@
-# Gradle
-# Build your Java project and run tests with Gradle using a Gradle wrapper script.
-# Add steps that analyze code, save build artifacts, deploy, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/languages/java
-
 trigger:
-- main
+  - main
 
 pool:
-  vmImage: ubuntu-latest
+  name: agentPool   # usa o agente self-hosted MacM4-Agent
 
 steps:
-- task: Gradle@3
-  inputs:
-    gradleWrapperFile: 'gradlew'  # Path to your Gradle wrapper
-    tasks: 'build'  # Replace with the tasks you want to run
-    options: '-Xmx3072m' 
-    publishJUnitResults: true
-    testResultsFiles: '**/TEST-*.xml'  # Updated pattern for test result files
-    javaHomeOption: 'JDKVersion'
-    jdkVersionOption: '1.11'  # Replace with your JDK version
-    jdkArchitectureOption: 'x64'
+  # Checkout do repositório
+  - checkout: self
+
+  # Configurar cache para Gradle (usa .gradle e build-cache)
+  - task: Cache@2
+    inputs:
+      key: 'gradle | "$(Agent.OS)" | build.gradle'
+      restoreKeys: |
+        gradle | "$(Agent.OS)"
+      path: ~/.gradle
+    displayName: 'Cache Gradle dependencies'
+
+  # Rodar build com Gradle Wrapper
+  - task: Gradle@3
+    inputs:
+      gradleWrapperFile: 'gradlew'
+      tasks: 'clean build'
+      options: '-Xmx3072m'
+      publishJUnitResults: true
+      testResultsFiles: '**/TEST-*.xml'
+      javaHomeOption: 'JDKVersion'
+      jdkVersionOption: '1.17'       # Java 17
+      jdkArchitectureOption: 'x64'
+
+  # Publicar resultados de testes
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFiles: '**/TEST-*.xml'
+      testRunTitle: 'JUnit Tests'
